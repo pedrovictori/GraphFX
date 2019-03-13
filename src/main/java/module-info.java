@@ -3,6 +3,6 @@ module GraphFX {
     requires javafx.fxml;
     requires org.jgrapht.core;
 
-    opens core to javafx.fxml;
-    exports core;
+    opens graphs to javafx.fxml;
+    exports graphs;
 }

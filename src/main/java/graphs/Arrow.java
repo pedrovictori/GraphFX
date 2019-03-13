@@ -1,4 +1,4 @@
-package core;
+package graphs;
 
 
 import javafx.scene.paint.Color;

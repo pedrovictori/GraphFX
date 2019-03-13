@@ -29,7 +29,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>core.CircleGraph</mainClass>
+                    <mainClass>graphs.CircleGraph</mainClass>
                 </configuration>
             </plugin>
 

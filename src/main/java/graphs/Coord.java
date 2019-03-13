@@ -1,4 +1,4 @@
-package core;
+package graphs;
 
 /**
  * Simple class to store pair of Doubles, referred as x and y.
