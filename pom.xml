@@ -48,7 +48,7 @@
         <mainClass>gui.Main</mainClass>
     </properties>
 
-    <groupId>microC2</groupId>
+    <groupId>microCJ</groupId>
     <artifactId>GraphFX</artifactId>
     <version>1.0-SNAPSHOT</version>
 
