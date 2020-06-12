@@ -27,7 +27,6 @@ public class GraphDisplay<V, E> extends Region {
 	private static final double DEFAULT_SIZE = 500;
 	private double size;
 	private final Graph<V, E> graph;
-	private double scale = 1; //todo implement
 	Map<V, Point2D> vertices2D;
 	Map<V, Shape> nodes;
 	Map<V, Text> labels;
@@ -36,6 +35,11 @@ public class GraphDisplay<V, E> extends Region {
 	private BiConsumer<V, Shape> vertexUpdater;
 	private BiConsumer<V, Text> labelUpdater;
 	private BiConsumer<E, Path> edgeUpdater;
+	private Function<V, Shape> nodeSupplier;
+	private UnaryOperator<Point2D> labelPlacer;
+	private Function<V, Text> textMapper;
+	private boolean arrow;
+	private BiFunction<E, Path, Path> edgeFormatter;
 
 	public GraphDisplay(Graph<V, E> graph) {
 		this.graph = graph;
@@ -47,43 +51,50 @@ public class GraphDisplay<V, E> extends Region {
 	}
 
 	public GraphDisplay<V, E> algorithm(LayoutAlgorithm2D <V, E> algorithm){
-		if(vertices2D != null) throw new IllegalStateException("algorithm() needs to be called before vertices, text or edges");
+		if(vertices2D != null) throw new IllegalStateException("algorithm(...) needs to be called before vertices, text or edges");
 		this.algorithm = algorithm;
 		return this;
 	}
 
 	public GraphDisplay<V, E> vertices(Function <V, Shape> nodeSupplier){
+		this.nodeSupplier = nodeSupplier;
+		return this;
+	}
+
+	private Map<V, Shape> produceVertices(){
 		size = Objects.requireNonNullElse(size, DEFAULT_SIZE);
 		algorithm = Objects.requireNonNullElse(algorithm, new RandomLayoutAlgorithm2D<>());
 		LayoutModel2D<V> layout = new MapLayoutModel2D<>(new Box2D(size, size));
 		algorithm.layout(graph, layout);
 		vertices2D = layout.collect();
-		nodes = graph.vertexSet().stream().collect(toMap(v -> v, v -> {
+		return nodes = graph.vertexSet().stream().collect(toMap(v -> v, v -> {
 			Point2D point2D = vertices2D.get(v);
 			Shape node = nodeSupplier.apply(v);
 			node.setLayoutX(point2D.getX());
 			node.setLayoutY(point2D.getY());
 			return node;
 		}));
+	}
+
+	public GraphDisplay<V, E> labels(UnaryOperator<Point2D> labelPlacer, Function<V, Text> textMapper){
+		this.labelPlacer = labelPlacer;
+		this.textMapper = textMapper;
 		return this;
 	}
 
-	public GraphDisplay<V, E> labels(UnaryOperator<Point2D> placer, Function<V, Text> textMapper){
-		labels = graph.vertexSet().stream().collect(toMap(v -> v, v -> {
-			Point2D place = placer.apply(vertices2D.get(v));
+	private Map<V, Text> produceLabels(){
+		return labels = graph.vertexSet().stream().collect(toMap(v -> v, v -> {
+			Point2D place = labelPlacer.apply(vertices2D.get(v));
 			Text text = textMapper.apply(v);
 			text.setX(place.getX());
 			text.setY(place.getY());
 			return text;
 		}));
-		return this;
 	}
 
 	public GraphDisplay<V, E> edges(boolean arrow, BiFunction<E, Path, Path> edgeFormatter) {
-		edges = graph.edgeSet().stream().collect(toMap(e -> e, e -> {
-					Path edge2d = new Edge2D(vertices2D.get(graph.getEdgeSource(e)), vertices2D.get(graph.getEdgeTarget(e)), arrow);
-					return edgeFormatter.apply(e, edge2d);
-				}));
+		this.arrow = arrow;
+		this.edgeFormatter = edgeFormatter;
 		return this;
 	}
 
@@ -91,11 +102,24 @@ public class GraphDisplay<V, E> extends Region {
 		return edges(graph.getType().isDirected(), edgeFormatter);
 	}
 
+	public Map<E, Path> produceEdges(){
+		return edges = graph.edgeSet().stream().collect(toMap(e -> e, e -> {
+			Path edge2d = new Edge2D(vertices2D.get(graph.getEdgeSource(e)), vertices2D.get(graph.getEdgeTarget(e)), arrow);
+			return edgeFormatter.apply(e, edge2d);
+		}));
+	}
 
 	public GraphDisplay<V, E> render(){
-		if(nodes != null) getChildren().addAll(nodes.values());
-		if(edges != null) getChildren().addAll(edges.values());
-		if(labels != null) getChildren().addAll(labels.values());
+		getChildren().clear();
+		if(nodeSupplier != null) getChildren().addAll(produceVertices().values());
+		if(edgeFormatter != null) getChildren().addAll(produceEdges().values());
+		if(textMapper != null) getChildren().addAll(produceLabels().values());
+		return this;
+	}
+
+	public GraphDisplay<V, E> updateSize(double newSize){
+		size = newSize;
+		render();
 		return this;
 	}
 
