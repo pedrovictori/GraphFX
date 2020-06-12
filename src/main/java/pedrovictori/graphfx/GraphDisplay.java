@@ -1,4 +1,4 @@
-package graphs;
+package pedrovictori.graphfx;
 
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Path;

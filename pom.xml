@@ -4,8 +4,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
-
     <build>
         <plugins>
             <plugin>
@@ -32,7 +30,7 @@
     </properties>
 
     <groupId>pedrovictori</groupId>
-    <artifactId>GraphFX</artifactId>
+    <artifactId>graphfx</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 
     <dependencies>

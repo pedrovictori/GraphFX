@@ -1,6 +1,5 @@
-module GraphFX {
+module graphfx{
     requires javafx.controls;
     requires org.jgrapht.core;
-
-    exports graphs;
+    exports pedrovictori.graphfx;
 }

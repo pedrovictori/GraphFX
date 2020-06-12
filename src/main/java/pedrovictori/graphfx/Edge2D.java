@@ -1,4 +1,4 @@
-package graphs;
+package pedrovictori.graphfx;
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.LineTo;
