@@ -41,7 +41,7 @@
         <dependency>
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-core</artifactId>
-            <version>1.4.0</version>
+            <version>1.5.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -52,4 +52,18 @@
             <url>https://maven.pkg.github.com/pedrovictori/graphfx</url>
         </repository>
     </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>maven-snapshots</id>
+            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>
