@@ -7,6 +7,7 @@ import javafx.scene.text.Text;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.drawing.LayoutAlgorithm2D;
 import org.jgrapht.alg.drawing.RandomLayoutAlgorithm2D;
+import org.jgrapht.alg.drawing.RescaleLayoutAlgorithm2D;
 import org.jgrapht.alg.drawing.model.Box2D;
 import org.jgrapht.alg.drawing.model.LayoutModel2D;
 import org.jgrapht.alg.drawing.model.MapLayoutModel2D;
@@ -40,6 +41,7 @@ public class GraphDisplay<V, E> extends Region {
 	private Function<V, Text> textMapper;
 	private boolean arrow;
 	private BiFunction<E, Path, Path> edgeFormatter;
+	private LayoutModel2D<V> layout;
 
 	public GraphDisplay(Graph<V, E> graph) {
 		this.graph = graph;
@@ -61,11 +63,15 @@ public class GraphDisplay<V, E> extends Region {
 		return this;
 	}
 
-	private Map<V, Shape> produceVertices(){
+	private void layoutGraph() {
 		size = Objects.requireNonNullElse(size, DEFAULT_SIZE);
 		algorithm = Objects.requireNonNullElse(algorithm, new RandomLayoutAlgorithm2D<>());
-		LayoutModel2D<V> layout = new MapLayoutModel2D<>(new Box2D(size, size));
+		layout = new MapLayoutModel2D<>(new Box2D(size, size));
 		algorithm.layout(graph, layout);
+	}
+
+	private Map<V, Shape> produceVertices(){
+		Objects.requireNonNull(layout, "Need to call layoutGraph before calling this for the first time");
 		vertices2D = layout.collect();
 		return nodes = graph.vertexSet().stream().collect(toMap(v -> v, v -> {
 			Point2D point2D = vertices2D.get(v);
@@ -110,17 +116,21 @@ public class GraphDisplay<V, E> extends Region {
 	}
 
 	public GraphDisplay<V, E> render(){
+		layoutGraph();
+		setElements();
+	}
+
+	private void setElements(){
 		getChildren().clear();
 		if(nodeSupplier != null) getChildren().addAll(produceVertices().values());
 		if(edgeFormatter != null) getChildren().addAll(produceEdges().values());
 		if(textMapper != null) getChildren().addAll(produceLabels().values());
-		return this;
 	}
 
-	public GraphDisplay<V, E> updateSize(double newSize){
-		size = newSize;
-		render();
-		return this;
+	public void rescale(double scale){
+		(new RescaleLayoutAlgorithm2D<V, E>(scale)).layout(graph, layout);
+		setElements();
+
 	}
 
 	public GraphDisplay<V, E> withVertexUpdater(BiConsumer<V, Shape> vertexUpdater){
