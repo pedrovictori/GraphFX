@@ -115,7 +115,7 @@ public class GraphDisplay<V, E> extends Region {
 		}));
 	}
 
-	public GraphDisplay<V, E> render(){
+	public void render(){
 		layoutGraph();
 		setElements();
 	}
@@ -148,7 +148,7 @@ public class GraphDisplay<V, E> extends Region {
 		return this;
 	}
 
-	public GraphDisplay<V, E> update(){
+	public voId update(){
 		if(vertexUpdater != null) nodes.forEach(vertexUpdater);
 		if(labelUpdater != null) labels.forEach(labelUpdater);
 		if(edgeUpdater != null) edges.forEach(edgeUpdater);
