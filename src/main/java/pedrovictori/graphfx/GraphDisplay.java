@@ -148,10 +148,9 @@ public class GraphDisplay<V, E> extends Region {
 		return this;
 	}
 
-	public voId update(){
+	public void update(){
 		if(vertexUpdater != null) nodes.forEach(vertexUpdater);
 		if(labelUpdater != null) labels.forEach(labelUpdater);
 		if(edgeUpdater != null) edges.forEach(edgeUpdater);
-		return this;
 	}
 }
