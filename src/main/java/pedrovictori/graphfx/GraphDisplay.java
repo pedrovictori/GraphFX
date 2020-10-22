@@ -14,10 +14,7 @@ import org.jgrapht.alg.drawing.model.MapLayoutModel2D;
 import org.jgrapht.alg.drawing.model.Point2D;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
+import java.util.function.*;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -131,6 +128,11 @@ public class GraphDisplay<V, E> extends Region {
 		(new RescaleLayoutAlgorithm2D<V, E>(scale)).layout(graph, layout);
 		setElements();
 
+	}
+
+	public void rescale(double scale, Consumer<Shape> vertexRescaler){
+		rescale(scale);
+		nodes.values().forEach(vertexRescaler);
 	}
 
 	public GraphDisplay<V, E> withVertexUpdater(BiConsumer<V, Shape> vertexUpdater){
