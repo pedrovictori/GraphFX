@@ -13,6 +13,15 @@
                     <release>11</release>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.5</version>
+                <configuration>
+                    <mainClass>pedrovictori.graphfx.UsageExample</mainClass>
+                </configuration>
+            </plugin>
         </plugins>
         <resources>
             <resource>
