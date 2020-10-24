@@ -39,6 +39,9 @@ public class GraphDisplay<V, E> extends Region {
 	private boolean arrow;
 	private BiFunction<E, Path, Path> edgeFormatter;
 	private LayoutModel2D<V> layout;
+	private ActionOnClick actionOnClick;
+	private Shape lastClicked;
+	private BiConsumer<V, Shape> customActionOnClick;
 
 	public GraphDisplay(Graph<V, E> graph) {
 		this.graph = graph;
@@ -112,16 +115,37 @@ public class GraphDisplay<V, E> extends Region {
 		}));
 	}
 
-	public void render(){
+	public void render(){ //todo this should be the step that returns the finished object, refactor
 		layoutGraph();
 		setElements();
 	}
 
 	private void setElements(){
 		getChildren().clear();
-		if(nodeSupplier != null) getChildren().addAll(produceVertices().values());
+		if(nodeSupplier != null) {
+			getChildren().addAll(produceVertices().values());
+
+			//click events
+			if(actionOnClick != null || customActionOnClick != null) {
+				for (Shape shape : nodes.values()) {
+					shape.setOnMouseClicked(event -> {
+						V clicked = nodes.entrySet().stream().filter(entry -> entry.getValue().equals(shape)).findAny().orElseThrow().getKey(); //find the vertex represented by this shape. The nodes map contains just one shape for every vertex.
+						if(actionOnClick != null) {
+							if (shape.equals(lastClicked)) {
+								actionOnClick.reset(this);
+							} else {
+								lastClicked = shape;
+								actionOnClick.execute(this, clicked);
+							}
+						}
+						if(customActionOnClick != null) customActionOnClick.accept(clicked, shape);
+					});
+				}
+			}
+		}
 		if(edgeFormatter != null) getChildren().addAll(produceEdges().values());
 		if(textMapper != null) getChildren().addAll(produceLabels().values());
+
 	}
 
 	public void rescale(double scale){
@@ -154,5 +178,31 @@ public class GraphDisplay<V, E> extends Region {
 		if(vertexUpdater != null) nodes.forEach(vertexUpdater);
 		if(labelUpdater != null) labels.forEach(labelUpdater);
 		if(edgeUpdater != null) edges.forEach(edgeUpdater);
+	}
+
+	public GraphDisplay<V, E> withActionOnClick(ActionOnClick action){
+		actionOnClick = action;
+		return this;
+	}
+
+	public GraphDisplay<V, E> withCustomActionOnClick(BiConsumer<V, Shape> action){
+		customActionOnClick = action;
+		return this;
+	}
+
+	protected Graph<V, E> getGraph(){
+		return graph;
+	}
+
+	protected Map<V, Shape> getNodes() {
+		return Objects.requireNonNull(nodes, "GraphDisplay hasn't been rendered yet");
+	}
+
+	protected Map<V, Text> getLabels() {
+		return Objects.requireNonNull(labels, "GraphDisplay hasn't been rendered yet");
+	}
+
+	protected Map<E, Path> getEdges() {
+		return Objects.requireNonNull(edges, "GraphDisplay hasn't been rendered yet");
 	}
 }
