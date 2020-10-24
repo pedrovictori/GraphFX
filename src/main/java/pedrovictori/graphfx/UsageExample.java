@@ -51,8 +51,8 @@ public class UsageExample extends Application {
 		graph.addEdge('2', 'C');
 
 		//Build the graph display
-		GraphDisplay<Character, DefaultEdge> graphDisplay = new GraphDisplay<>(graph);
-		graphDisplay.size(500)
+		GraphDisplay<Character, DefaultEdge> graphDisplay = (new GraphDisplay<>(graph))
+				.size(500)
 				.algorithm(new FRLayoutAlgorithm2D<>())
 				.vertices(character -> new Circle(20, Character.isDigit(character) ? Color.RED : Color.BLUE))
 				.labels(point2D -> new Point2D(point2D.getX(), point2D.getY() - 35), character -> new Text(character.toString()))
@@ -61,7 +61,9 @@ public class UsageExample extends Application {
 					path.getStrokeDashArray().addAll(20., 8.);
 					path.setStrokeWidth(2);
 					return path;
-				});
+				})
+				.withActionOnClick(ActionOnClick.HIGHLIGHT_OUTGOING_EDGES)
+				.withCustomActionOnClick((character, shape) -> System.out.println(character));
 		graphDisplay.render();
 
 		//Build JavaFX scene
