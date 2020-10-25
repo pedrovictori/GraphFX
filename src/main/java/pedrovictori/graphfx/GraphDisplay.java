@@ -40,8 +40,10 @@ public class GraphDisplay<V, E> extends Region {
 	private BiFunction<E, Path, Path> edgeFormatter;
 	private LayoutModel2D<V> layout;
 	private ActionOnClick actionOnClick;
-	private Shape lastClicked;
+	private Shape lastShapeClicked;
+	private V lastVertexClicked;
 	private BiConsumer<V, Shape> customActionOnClick;
+	private BiConsumer<V, Shape> customActionOnClickReset;
 
 	public GraphDisplay(Graph<V, E> graph) {
 		this.graph = graph;
@@ -131,14 +133,23 @@ public class GraphDisplay<V, E> extends Region {
 					shape.setOnMouseClicked(event -> {
 						V clicked = nodes.entrySet().stream().filter(entry -> entry.getValue().equals(shape)).findAny().orElseThrow().getKey(); //find the vertex represented by this shape. The nodes map contains just one shape for every vertex.
 						if(actionOnClick != null) {
-							if (shape.equals(lastClicked)) {
+							if (shape.equals(lastShapeClicked)) {
 								actionOnClick.reset(this);
 							} else {
-								lastClicked = shape;
 								actionOnClick.execute(this, clicked);
 							}
 						}
-						if(customActionOnClick != null) customActionOnClick.accept(clicked, shape);
+						if(customActionOnClick != null) {
+							if (shape.equals(lastShapeClicked)) {
+								customActionOnClickReset.accept(clicked, shape);
+							} else {
+								if(lastShapeClicked != null) customActionOnClickReset.accept(lastVertexClicked, lastShapeClicked);
+								customActionOnClick.accept(clicked, shape);
+							}
+						}
+
+						lastShapeClicked = shape.equals(lastShapeClicked) ? null : shape; //if a reset happened in this click, also set lastShapeClicked to null
+						lastVertexClicked = clicked;
 					});
 				}
 			}
@@ -187,6 +198,16 @@ public class GraphDisplay<V, E> extends Region {
 
 	public GraphDisplay<V, E> withCustomActionOnClick(BiConsumer<V, Shape> action){
 		customActionOnClick = action;
+		return this;
+	}
+
+	/**
+	 * Define a function to be executed before every custom action on click.
+	 * @param reset the function to be executed before every custom action on click. This consumer function takes the last vertex to be clicked, and its Shape
+	 * @return this GraphDisplay
+	 */
+	public GraphDisplay<V, E> withCustomActionOnClickReset(BiConsumer<V, Shape> reset){
+		customActionOnClickReset = reset;
 		return this;
 	}
 

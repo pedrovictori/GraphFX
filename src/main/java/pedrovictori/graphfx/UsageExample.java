@@ -63,11 +63,15 @@ public class UsageExample extends Application {
 					return path;
 				})
 				.withActionOnClick(ActionOnClick.HIGHLIGHT_OUTGOING_EDGES)
-				.withCustomActionOnClick((character, shape) -> System.out.println(character));
+				.withCustomActionOnClick((character, shape) -> {
+					System.out.println(character);
+					shape.setFill(Color.YELLOW);
+				})
+				.withCustomActionOnClickReset((character, shape) -> shape.setFill(Character.isDigit(character) ? Color.RED : Color.BLUE));
 		graphDisplay.render();
 
 		//Build JavaFX scene
-		primaryStage.setTitle("Hello World!");
+		primaryStage.setTitle("GraphFX usage example");
 		StackPane root = new StackPane();
 		root.setPadding(new Insets(20));
 		root.getChildren().add(graphDisplay);
