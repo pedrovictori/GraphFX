@@ -14,3 +14,7 @@ hs_err_pid*
 target/
 
 GraphFX.iml
+
+.idea/libraries/
+
+.idea/
